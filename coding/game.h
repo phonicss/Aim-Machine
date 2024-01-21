@@ -3,6 +3,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
@@ -22,9 +23,13 @@ class Game {
         sf::VideoMode videoMode;
         sf::Event ev;
 
+        //Game objects
+        sf::CircleShape enemy;
+
         //private functions
         void initVariables();
         void initWindow();
+        void initEnemies();
 
     public:
         //constructors / destructors 

@@ -5,6 +5,13 @@
 //private functions
 void Game::initVariables () {
     this->window = nullptr;
+
+    //game logic
+    this->points = 0;
+    this->enemySpawnTimerMax = 500;
+    this->enemySpawnTimer = this->enemySpawnTimerMax;
+    this->maxEnemies = 10;
+
 };
 
 void Game::initWindow () {
@@ -40,6 +47,24 @@ const bool Game::running () const {
 };
 
 //Functions 
+
+void Game::spawnEnemy () {
+
+    //spawn enemies, colors and positions
+
+    this->enemy.setPosition(
+        static_cast<float>(rand() % static_cast<int>(this->window->getSize().x - this->enemy.getRadius())),
+        0.f
+    );
+
+    //spawn the enemy
+    this->enemies.push_back(this->enemy);
+
+    //remove enemies at the end
+};
+
+
+
 void Game::pollEvenets () {
       //Event pulling
     while (this->window->pollEvent(this->ev)) {
@@ -56,22 +81,55 @@ void Game::pollEvenets () {
     }
 }
 
+void Game:: updateMousePositions () {
 
+    this->mousePosWindow = sf::Mouse::getPosition(*this->window);
+};
+
+void Game::updateEnemies () {
+
+    //updating the timer for enemy spawning
+    if (this->enemies.size() < this->maxEnemies) {
+        if (this->enemySpawnTimer >= this->enemySpawnTimerMax) {
+            //spawn the enemy and respawn the timer
+            this->spawnEnemy();
+            this->enemySpawnTimer = 0.f;
+        } else {
+            this->enemySpawnTimer += 1.f;
+        }
+    }
+
+    //move enemies 
+
+    for ( auto &e : this->enemies) {
+        e.move(0.f,5.f);
+    }
+
+
+}
 
 void Game::update () {
     this->pollEvenets();
+    this->updateMousePositions();
+    this->updateEnemies();
 
-    //update mouse position
-    sf::Mouse::getPosition(*this->window).x;
-    sf::Mouse::getPosition(*this->window).y;
+    
 };
+
+void Game::renderEnemies () {
+       //render all enemies
+    for ( auto &e : this->enemies) {
+        this->window->draw(e);
+    }
+
+}
 
 
 void Game::render () {
 
     this->window->clear();
     //draw a game
-    this->window->draw(this->enemy);
+    this->renderEnemies();
 
     this->window->display();
 };

@@ -4,6 +4,8 @@
 #define GAME_H
 
 #include <iostream>
+#include <vector>
+#include <ctime>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
@@ -23,7 +25,17 @@ class Game {
         sf::VideoMode videoMode;
         sf::Event ev;
 
+        //Mouse positions
+        sf::Vector2i mousePosWindow;
+
+        //Game logic
+        int points;
+        float enemySpawnTimer;
+        float enemySpawnTimerMax;
+        int maxEnemies;
+
         //Game objects
+        std::vector<sf::CircleShape> enemies;
         sf::CircleShape enemy;
 
         //private functions
@@ -41,8 +53,12 @@ class Game {
 
 
         //Functions
+        void spawnEnemy();
         void pollEvenets();
+        void updateMousePositions();
+        void updateEnemies();
         void update();
+        void renderEnemies();
         void render();
 };
 

@@ -7,10 +7,14 @@ void Game::initVariables () {
     this->window = nullptr;
 
     //game logic
+    this->endGame = false;
     this->points = 0;
+    this->health = 10;
     this->enemySpawnTimerMax = 10;
     this->enemySpawnTimer = this->enemySpawnTimerMax;
     this->maxEnemies = 20;
+    bool deleted = false;
+    this->mouseHeld = false;
 
 };
 
@@ -46,6 +50,10 @@ const bool Game::running () const {
     return this->window->isOpen();
 };
 
+const bool Game::getEndGame () const {
+    return this->endGame;
+}
+
 //Functions 
 
 void Game::spawnEnemy () {
@@ -53,7 +61,7 @@ void Game::spawnEnemy () {
     //spawn enemies, colors and positions
 
     this->enemy.setPosition(
-        static_cast<float>(rand() % static_cast<int>(this->window->getSize().x - this->enemy.getRadius())),
+        static_cast<float>(rand() % static_cast<int>(this->window->getSize().x - this->enemy.getRadius() - 10)),
         0.f
     );
 
@@ -67,15 +75,19 @@ void Game::spawnEnemy () {
 
 
 
-void Game::pollEvenets () {
+void Game::pollEvenets () 
+{
       //Event pulling
-    while (this->window->pollEvent(this->ev)) {
-        switch (this->ev.type) {
+    while (this->window->pollEvent(this->ev)) 
+    {
+        switch (this->ev.type) 
+        {
             case sf::Event::Closed:
                 this->window->close();
                 break;
             case sf::Event::KeyPressed:
-                if (this->ev.key.code == sf::Keyboard::Escape) {
+                if (this->ev.key.code == sf::Keyboard::Escape) 
+                {
                     this->window->close();
                 }
                 break;
@@ -83,77 +95,102 @@ void Game::pollEvenets () {
     }
 }
 
-void Game:: updateMousePositions () {
+void Game:: updateMousePositions () 
+{
 
     this->mousePosWindow = sf::Mouse::getPosition(*this->window);
     this->mousePosview = this->window->mapPixelToCoords(this->mousePosWindow);
 };
 
-void Game::updateEnemies () {
+void Game::updateEnemies () 
+{
 
     //updating the timer for enemy spawning
-    if (this->enemies.size() < this->maxEnemies) {
-        if (this->enemySpawnTimer >= this->enemySpawnTimerMax) {
+    if (this->enemies.size() < this->maxEnemies) 
+    {
+        if (this->enemySpawnTimer >= this->enemySpawnTimerMax) 
+        {
             //spawn the enemy and respawn the timer
             this->spawnEnemy();
             this->enemySpawnTimer = 0.f;
-        } else {
+        } else 
+        {
             this->enemySpawnTimer += 1.f;
         }
     }
 
     //move enemies and update them
 
-    for ( int i = 0; i < enemies.size(); i++) {
-        bool deleted = false;
+    for ( int i = 0; i < enemies.size(); i++) 
+    {
+        deleted = false;
         this->enemies[i].move(0.f,5.f);
-
-        //check if clicked upon
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            if (this->enemies[i].getGlobalBounds().contains(this->mousePosview)) {
-                deleted = true;
-
-                //gain points
-                this->points += 10;
-
-            }
+         //if enemy is out of bound
+        if (this->enemies[i].getPosition().y > this->window->getSize().y) 
+        {
+            this -> enemies.erase(this->enemies.begin() + i);
+            this->health = this->health - 1;
         }
-
-        //if enemy outbound delete it 
-        if (this->enemies[i].getPosition().y > this->window->getSize().y) {
-            deleted = true;
-        }
-
-        //final delete
-        if (deleted) {
-            this->enemies.erase(this->enemies.begin() + i);
-        }
-
-
-
     }
 
+    //Check if cliked
 
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) 
+    {
+        if (this->mouseHeld == false) 
+        {   
+            this->mouseHeld = true;
+            deleted = false;
+            for (size_t i = 0; i < this->enemies.size() && deleted == false ; i++) 
+            {
+                if (this->enemies[i].getGlobalBounds().contains(this->mousePosview))
+                {
+                //delete an enemy
+                deleted = true;
+                this->enemies.erase(enemies.begin() + i);
+                //gain points
+                this->points += 1;
+                }
+            }
+        }
+    } else 
+    {
+        this->mouseHeld = false;
+    }
 }
 
-void Game::update () {
+void Game::update () 
+{
     this->pollEvenets();
-    this->updateMousePositions();
-    this->updateEnemies();
+
+    if (!this->endGame) 
+    {
+        this->updateMousePositions();
+        this->updateEnemies();  
+    }
+    
+    //end game condition
+    if (this->health <= 0) 
+    {
+        this->endGame = true;
+    }
 
     
 };
 
-void Game::renderEnemies () {
+void Game::renderEnemies () 
+{
        //render all enemies
-    for ( auto &e : this->enemies) {
+    for ( auto &e : this->enemies) 
+    {
         this->window->draw(e);
     }
 
 }
 
 
-void Game::render () {
+void Game::render () 
+{
 
     this->window->clear();
     //draw a game

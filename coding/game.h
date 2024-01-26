@@ -30,10 +30,14 @@ class Game {
         sf::Vector2f mousePosview;
 
         //Game logic
-        int points;
+        bool endGame;
+        unsigned points;
+        int health;
         float enemySpawnTimer;
         float enemySpawnTimerMax;
         int maxEnemies;
+        bool deleted;
+        bool mouseHeld;
 
         //Game objects
         std::vector<sf::CircleShape> enemies;
@@ -51,6 +55,7 @@ class Game {
 
         //Accsessors
         const bool running() const;
+        const bool getEndGame() const;
 
 
         //Functions
